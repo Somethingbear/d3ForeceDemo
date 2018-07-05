@@ -8,14 +8,14 @@ let svg = d3.select("svg"),
 let simulation = d3.forceSimulation()
 	.force("link", d3.forceLink().id(function (d) {
 		return d.id;
-	}).distance(500))
+	}))
 	.force("charge", d3.forceManyBody())
 	.force("center", d3.forceCenter(width / 2, height / 2));
 
-d3.json("/miserables.json", {
-		crossOrigin: "anonymous"
-	})
-	.then((graph) => {
+d3.json("/miserables.json", 
+	(error, graph) => {
+		if (error) throw error;
+
 		let link = svg.append("g")
 			.attr("class", "links")
 			.selectAll("line")
@@ -32,7 +32,7 @@ d3.json("/miserables.json", {
 				.on("start", dragstarted)
 				.on("drag", dragged)
 				.on("end", dragended));
-
+		
 		const text = svg.append("g").attr("class", "names").selectAll("g")
 			.data(graph.nodes)
 			.enter().append("g");
@@ -47,10 +47,14 @@ d3.json("/miserables.json", {
 			.text(function (d) {
 				return d.id;
 			})
-
+		
 		simulation
 			.nodes(graph.nodes)
 			.on("tick", ticked);
+
+		simulation.force("link")
+			.distance(100)
+            .links(graph.links);
 
 		function ticked() {
 			link
@@ -83,9 +87,6 @@ d3.json("/miserables.json", {
 
 
 
-	})
-	.catch((error) => {
-		throw (error);
 	});
 
 function dragstarted(d) {
