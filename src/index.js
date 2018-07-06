@@ -5,22 +5,6 @@ let svg = d3.select("svg"),
 	width = svg.attr("width"),
 	height = svg.attr("height");
 
-let marker = svg.append("marker")
-	//.attr("id", function(d) { return d; })
-	.attr("id", "arrow")
-	.attr("markerUnits","strokeWidth")//设置为strokeWidth箭头会随着线的粗细发生变化
-	// .attr("markerUnits","userSpaceOnUse")
-	//.attr("viewBox", "0 -5 10 10")//坐标系的区域
-	.attr("refX", 15.5)//箭头坐标
-	.attr("refY", 5)
-	.attr("markerWidth", 10)//标识的大小
-	.attr("markerHeight", 10)
-	.attr("orient", "auto")//绘制方向，可设定为：auto（自动确认方向）和 角度值
-	// .attr("stroke-width",2)//箭头宽度
-	.append("path")
-	.attr("d", "M0,0 L0,10 L10,5")//箭头的路径
-	.attr('fill','#aaa');//箭头颜色
-
 let simulation = d3.forceSimulation()
 	.force("link", d3.forceLink().id(function (d) {
 		return d.id;
@@ -28,16 +12,33 @@ let simulation = d3.forceSimulation()
 	.force("charge", d3.forceManyBody())
 	.force("center", d3.forceCenter(width / 2, height / 2));
 
-d3.json("/miserables.json", 
+d3.json("/miserables.json", //"/a.json",
 	(error, graph) => {
 		if (error) throw error;
+
+		let marker = svg.append("marker")
+			//.attr("id", function(d) { return d; })
+			.attr("id", "arrow")
+			.attr("markerUnits","strokeWidth")//设置为strokeWidth箭头会随着线的粗细发生变化
+			//.attr("markerUnits","userSpaceOnUse")
+			//.attr("viewBox", "0 -5 10 10")//坐标系的区域
+			.attr("refX", 15.5)//箭头坐标
+			.attr("refY", 5)
+			.attr("markerWidth", 10)//标识的大小
+			.attr("markerHeight", 10)
+			.attr("orient", "auto")//绘制方向，可设定为：auto（自动确认方向）和 角度值
+			// .attr("stroke-width",2)//箭头宽度
+			let markPath = marker.append("path")
+			.attr("d", "M0,0 L0,10 L10,5")//箭头的路径
+			.attr('fill','#aaa');//箭头颜色
 
 		let link = svg.append("g")
 			.attr("class", "links")
 			.selectAll("line")
 			.data(graph.links)
 			.enter().append("line")
-			.attr("marker-end", "url(#arrow)" );;
+			.attr("stroke-width", 1)
+			.attr("marker-end", "url(#arrow)" );
 
 		let node = svg.append("g")
 			.attr("class", "nodes")
@@ -45,6 +46,28 @@ d3.json("/miserables.json",
 			.data(graph.nodes)
 			.enter().append("circle")
 			.attr("r", 5.5)
+			.on("mouseover", (node) => {
+				let nodeName = node.id;
+				link.style("stroke-width", (linkLine) => {
+					if(linkLine.source.id == node.id || linkLine.target.id == node.id){
+						marker.attr("markerUnits","userSpaceOnUse");
+						return 4;
+					}else{
+						return 1;
+					}
+				});
+				link.style("stroke", (linkLine) => {
+					if(linkLine.source.id == node.id || linkLine.target.id == node.id){
+						return "#000";
+					}else{
+						return "#aaa";
+					}
+				});
+			})
+			.on("mouseleave", () => {
+				link.style("stroke-width", 1).style("stroke","#aaa");
+				marker.attr("markerUnits","strokeWidth");
+			})
 			.call(d3.drag()
 				.on("start", dragstarted)
 				.on("drag", dragged)

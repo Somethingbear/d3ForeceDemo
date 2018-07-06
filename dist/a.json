@@ -6,7 +6,6 @@
     ],
     "links": [
         {"source": "A", "target": "B"},
-        {"source": "A", "target": "C"},
-        {"source": "B", "target": "C"}
+        {"source": "A", "target": "C"}
     ]
 }
