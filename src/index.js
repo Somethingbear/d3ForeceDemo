@@ -5,6 +5,22 @@ let svg = d3.select("svg"),
 	width = svg.attr("width"),
 	height = svg.attr("height");
 
+let marker = svg.append("marker")
+	//.attr("id", function(d) { return d; })
+	.attr("id", "arrow")
+	.attr("markerUnits","strokeWidth")//设置为strokeWidth箭头会随着线的粗细发生变化
+	// .attr("markerUnits","userSpaceOnUse")
+	//.attr("viewBox", "0 -5 10 10")//坐标系的区域
+	.attr("refX", 15.5)//箭头坐标
+	.attr("refY", 5)
+	.attr("markerWidth", 10)//标识的大小
+	.attr("markerHeight", 10)
+	.attr("orient", "auto")//绘制方向，可设定为：auto（自动确认方向）和 角度值
+	// .attr("stroke-width",2)//箭头宽度
+	.append("path")
+	.attr("d", "M0,0 L0,10 L10,5")//箭头的路径
+	.attr('fill','#aaa');//箭头颜色
+
 let simulation = d3.forceSimulation()
 	.force("link", d3.forceLink().id(function (d) {
 		return d.id;
@@ -20,14 +36,15 @@ d3.json("/miserables.json",
 			.attr("class", "links")
 			.selectAll("line")
 			.data(graph.links)
-			.enter().append("line");
+			.enter().append("line")
+			.attr("marker-end", "url(#arrow)" );;
 
 		let node = svg.append("g")
 			.attr("class", "nodes")
 			.selectAll("circle")
 			.data(graph.nodes)
 			.enter().append("circle")
-			.attr("r", 2.5)
+			.attr("r", 5.5)
 			.call(d3.drag()
 				.on("start", dragstarted)
 				.on("drag", dragged)
@@ -36,6 +53,8 @@ d3.json("/miserables.json",
 		const text = svg.append("g").attr("class", "names").selectAll("g")
 			.data(graph.nodes)
 			.enter().append("g");
+
+		
 
 		text.append("text")
 			.attr("x", 14)
@@ -53,7 +72,7 @@ d3.json("/miserables.json",
 			.on("tick", ticked);
 
 		simulation.force("link")
-			.distance(100)
+			.distance(300)
             .links(graph.links);
 
 		function ticked() {
